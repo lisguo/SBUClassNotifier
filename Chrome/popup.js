@@ -1,4 +1,6 @@
 var class_arr = new Array();
+var xmlhttp;
+
 function addClass(){
     var class_name = document.getElementById("class_name").value
     var class_id = document.getElementById("class_input").value;
@@ -6,7 +8,7 @@ function addClass(){
     
     //Create xml link
     var xml = "http://classfind.stonybrook.edu/vufind/AJAX/JSON?method=getItemVUStatuses";
-    var semester = 1174;
+    var semester = 1178;
     var link = xml + "&itemid=" + class_id + "&strm=" + semester;
     
     //Create class and put them into arr and back into an object for storage
@@ -44,32 +46,31 @@ function addClass(){
     updateStatus();
 }
 
-function getXML(link){
-    var xmlhttp = new XMLHttpRequest();
+function getJson(link){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.open("GET", link, false);
     xmlhttp.onreadystatechange=function(){
-        if(xmlhttp.readyState == 4 && http.status == 200){ //completed and successful
-            console.log(xmlhttp.responseText);
-            return xmlhttp.responseText;
+        if(this.readyState == 4 && this.status == 200){ //completed and successful
+            //console.log("response text: " + xmlhttp.responseText);
         }
     }
-    
-    xmlhttp.open("GET", link, false);
     xmlhttp.send();
+    return xmlhttp.responseText;
 }
 
 function getSeats(classObject){
     var link = classObject.link;
     console.log("link : " + link);
     
-    //Get xml from link
-    var text = getXML(link);
-    console.log("text : " + text);
+    //Get json from link
+    var text = getJson(link);
     
-    //parse xml
-    parser = new DOMParser();
-    var xml = parser.parseFromString(text, "text/xml");
-    
-    var seats = xml.getElementsByTagName("SU_ENRL_AVAL")[0].childNodes[0].nodeValue;
+    //Get seats from text
+    var tag = "<SU_ENRL_AVAL>";
+    var closeTag = "<\\/SU_ENRL_AVAL>";
+    console.log("Close tag: " + closeTag);
+    var seats = text.substring(text.indexOf(tag) + tag.length, text.indexOf(closeTag));
+    //console.log("Seats : " + seats);
     return seats;
 }
 function updateStatus(){
